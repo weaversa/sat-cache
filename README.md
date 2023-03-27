@@ -46,12 +46,20 @@ ok
 ok
 ok
 ok
+ok
+ok
+unsat
+ok
+ok
+ok
+ok
+ok
 sat
 0b0000000000000000000000000000000000000000000011011001011100000001
 
-real    0m0.524s
-user    0m0.007s
-sys     0m0.010s
+real    0m1.083s
+user    0m0.004s
+sys     0m0.011s
 ```
 
 Notice the `(check)` line will take longer the first time it's run. Running this example a second time will provide results instantly:
@@ -68,12 +76,20 @@ ok
 ok
 ok
 ok
+ok
+ok
+unsat
+ok
+ok
+ok
+ok
+ok
 sat
 0b0000000000000000000000000000000000000000000011011001011100000001
 
-real    0m0.015s
-user    0m0.006s
-sys     0m0.009s
+real    0m0.053s
+user    0m0.002s
+sys     0m0.008s
 ```
 
 # Cryptol
