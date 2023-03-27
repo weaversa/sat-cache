@@ -15,7 +15,6 @@ This project uses a number of mechanisms for increasing its assurance.
     used at the pedantic level,
   - the [rust formatter](https://github.com/rust-lang/rustfmt) is used
     to ensure the code adheres to idomatic Rust,
-  - every public function has a postive and negative test,
   - the above tools are used by the CI to enforce invariants on this project.
 
 # Local Testing
