@@ -1,6 +1,6 @@
 # `satcache`: a caching mechanism for SAT and SMT queries.
 
-[![Build, Test, Publish](https://github.com/weaversa/cryptol-rust-client/actions/workflows/main.yml/badge.svg)](https://github.com/weaversa/satcache/actions/workflows/main.yml)
+[![Build, Test, Publish](https://github.com/weaversa/cryptol-rust-client/actions/workflows/main.yml/badge.svg)](https://github.com/weaversa/sat-cache/actions/workflows/main.yml)
 
 # Purpose
 
