@@ -85,13 +85,17 @@ fn send_line_to_stdout(line: &str) {
 /// # Panics
 ///
 /// This function may panic if the request to the SMT solver has some
-/// issue.
+/// issue such as more (pop) than (push) commands.
 pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<String>) {
     // Connect to the database.
     let db = db_connect("satcache.db");
 
     // Create a SHA3-384 object.
     let mut hasher = Sha3_384::new();
+
+    // Create stack of hashes to maintain push/pop commands.
+    let mut stack: Vec<Sha3_384> = Vec::new();
+    stack.push(hasher.clone());
 
     // The main loop.
     loop {
@@ -102,8 +106,17 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
             continue;
         }
 
-        // Add the line into the hash state.
-        hasher.update(&line);
+        if line.eq("(push)") {
+            stack.push(hasher.clone());
+        } else if line.eq("(pop)") {
+            hasher = stack.pop().unwrap();
+            if stack.is_empty() {
+                panic!("(pop) command without a corresponding (push)");
+            }
+        } else {
+            // Add the line into the hash state.
+            hasher.update(&line);
+        }
 
         // Proccess line
         if line.starts_with("(check") || line.starts_with("(eval ") {
