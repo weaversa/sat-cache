@@ -29,7 +29,7 @@ $ cargo build --examples
 Then add the new `yices` binary to your path:
 
 ```
-$ export PATH="$(pwd)/target/debug/yices:$PATH"
+$ export PATH="$(pwd)/target/debug/examples/yices:$PATH"
 ```
 
 Next, the following commands may be run to test this project:
