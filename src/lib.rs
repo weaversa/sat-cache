@@ -106,9 +106,11 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
             continue;
         }
 
-        if line.starts_with("(push") {  // This is a little presumptive as `push` can take an argument.
+        if line.starts_with("(push") {
+            // This is a little presumptive as `push` can take an argument.
             stack.push(hasher.clone());
-        } else if line.starts_with("(pop") {  // This is also a little presumptive as `pop` can take an argument.
+        } else if line.starts_with("(pop") {
+            // This is also a little presumptive as `pop` can take an argument.
             hasher = stack.pop().unwrap();
             assert!(
                 !stack.is_empty(),
@@ -120,7 +122,10 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
         }
 
         // Proccess line
-        if line.starts_with("(check") || line.starts_with("(eval ") {
+        if line.starts_with("(check")
+            || line.starts_with("(eval ")
+            || line.starts_with("(get-value ")
+        {
             // Check to see if this session is cached.
             let mut response = get_result(&db, &get_hash(&hasher));
             if response.is_empty() {
