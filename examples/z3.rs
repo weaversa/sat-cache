@@ -51,5 +51,6 @@ pub fn main() {
         z3_receiver,
     );
     satcache::simple_smt_transaction(&to_z3, &from_z3);
+    std::process::exit(0);
     //z3.kill().unwrap(); // Just in case it's still running.
 }
