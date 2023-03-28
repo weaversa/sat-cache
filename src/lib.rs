@@ -68,9 +68,9 @@ fn get_hash(hasher: &Sha3_384) -> String {
 /// Helper function to get the next whole line from `stdin`.
 fn get_next_line_from_stdin() -> String {
     let stdin = std::io::stdin();
-    match stdin.lock().lines().next().unwrap() {
-        Ok(r) => r,
-        Err(_) => String::new(),
+    match stdin.lock().lines().next() {
+        Some(Ok(r)) => r,
+        Some(Err(_)) | None => String::new(),
     }
 }
 
