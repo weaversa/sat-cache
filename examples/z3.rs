@@ -51,5 +51,5 @@ pub fn main() {
         z3_receiver,
     );
     satcache::simple_smt_transaction(&to_z3, &from_z3);
-    z3.kill().unwrap(); // Just in case it's still running.
+    //z3.kill().unwrap(); // Just in case it's still running.
 }
