@@ -10,5 +10,6 @@ name = "yices"
 
 [dependencies]
 base64 = "0.21.0"
+nix = "0.26.2"
 rusqlite = { version = "0.28.0", features = ["bundled"] }
 sha3 = "0.10.6"
