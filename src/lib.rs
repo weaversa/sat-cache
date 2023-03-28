@@ -110,7 +110,10 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
             stack.push(hasher.clone());
         } else if line.eq("(pop)") {
             hasher = stack.pop().unwrap();
-            assert!(!stack.is_empty(), "(pop) command without a corresponding (push)");
+            assert!(
+                !stack.is_empty(),
+                "(pop) command without a corresponding (push)"
+            );
         } else {
             // Add the line into the hash state.
             hasher.update(&line);
