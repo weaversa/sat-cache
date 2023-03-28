@@ -106,9 +106,9 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
             continue;
         }
 
-        if line.eq("(push)") {
+        if line.starts_with("(push") {  // This is a little presumptive as `push` can take an argument.
             stack.push(hasher.clone());
-        } else if line.eq("(pop)") {
+        } else if line.starts_with("(pop") {  // This is also a little presumptive as `pop` can take an argument.
             hasher = stack.pop().unwrap();
             assert!(
                 !stack.is_empty(),
