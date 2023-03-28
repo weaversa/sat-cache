@@ -41,9 +41,6 @@
 
 use std::sync::mpsc::channel;
 
-use nix::unistd::Pid;
-use nix::sys::signal::{self, Signal};
-
 pub fn main() {
     let (z3_sender, from_z3) = channel();
     let (to_z3, z3_receiver) = channel();
@@ -55,8 +52,5 @@ pub fn main() {
     );
     satcache::simple_smt_transaction(&to_z3, &from_z3);
 
-    signal::kill(Pid::from_raw(z3.id().try_into().unwrap()), Signal::SIGTERM).unwrap();
-    
-    //std::process::exit(0);
-    //z3.kill().unwrap(); // Just in case it's still running.
+    z3.kill().unwrap(); // Just in case it's still running.
 }
