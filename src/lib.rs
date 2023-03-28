@@ -68,7 +68,10 @@ fn get_hash(hasher: &Sha3_384) -> String {
 /// Helper function to get the next whole line from `stdin`.
 fn get_next_line_from_stdin() -> String {
     let stdin = std::io::stdin();
-    stdin.lock().lines().next().unwrap().unwrap()
+    match stdin.lock().lines().next().unwrap() {
+        Ok(r) => r,
+        Err(_) => String::new(),
+    }
 }
 
 /// Helper function to send a whole line to `stdout`.
@@ -100,6 +103,9 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
     // The main loop.
     loop {
         let line = get_next_line_from_stdin();
+        if line.is_empty() {
+            break;
+        }
 
         // Skip SMT-LIB2 comments.
         if line.starts_with(';') {

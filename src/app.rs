@@ -16,11 +16,10 @@ fn start_process_thread(child: &mut Child, sender: Sender<String>, receiver: Rec
         loop {
             let line = receiver.recv().unwrap();
             writeln!(stdin, "{line}").unwrap();
-            if line.eq("(exit)") {
+            let mut buf = String::new();
+            if f.read_line(&mut buf).is_err() {
                 break;
             }
-            let mut buf = String::new();
-            f.read_line(&mut buf).unwrap();
             sender.send(buf).unwrap();
         }
     });
