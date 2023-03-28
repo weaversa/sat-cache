@@ -38,6 +38,8 @@
 //! (Total Elapsed Time: 0.030s, using "Yices")
 //! ```
 
+#![forbid(unsafe_code)]
+
 use std::sync::mpsc::channel;
 
 pub fn main() {

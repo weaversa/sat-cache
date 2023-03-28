@@ -1,5 +1,7 @@
 // Gleaned from https://www.nikbrendler.com/rust-process-communication-part-2/
 
+#![forbid(unsafe_code)]
+
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::{Receiver, Sender};
