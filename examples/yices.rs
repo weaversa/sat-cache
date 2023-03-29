@@ -45,12 +45,11 @@ use std::sync::mpsc::channel;
 pub fn main() {
     let (yices_sender, from_yices) = channel();
     let (to_yices, yices_receiver) = channel();
-    let mut yices = satcache::app::start_process(
+    let _yices = satcache::app::start_process(
         "/usr/local/bin/yices",
         vec!["--mode=push-pop", "--print-success"],
         yices_sender,
         yices_receiver,
     );
     satcache::simple_smt_transaction(&to_yices, &from_yices);
-    yices.kill().unwrap(); // Just in case it's still running.
 }

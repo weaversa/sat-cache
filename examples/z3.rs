@@ -41,22 +41,14 @@
 
 use std::sync::mpsc::channel;
 
-use nix::unistd::Pid;
-use nix::sys::signal::{self, Signal};
-
 pub fn main() {
     let (z3_sender, from_z3) = channel();
     let (to_z3, z3_receiver) = channel();
-    let mut z3 = satcache::app::start_process(
+    let _z3 = satcache::app::start_process(
         "/usr/local/bin/z3",
         vec!["-smt2", "-in"],
         z3_sender,
         z3_receiver,
     );
     satcache::simple_smt_transaction(&to_z3, &from_z3);
-
-    signal::kill(Pid::from_raw(z3.id().try_into().unwrap()), Signal::SIGTERM).unwrap();
-    
-    //std::process::exit(0);
-    //z3.kill().unwrap(); // Just in case it's still running.
 }

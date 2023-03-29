@@ -13,8 +13,15 @@ fn start_process_thread(child: &mut Child, sender: Sender<String>, receiver: Rec
     let stdout = child.stdout.take().unwrap();
     thread::spawn(move || {
         let mut f = BufReader::new(stdout);
+        let mut exit = false;
         loop {
+            if exit {
+                break;
+            }
             let line = receiver.recv().unwrap();
+            if line.eq("(exit)") {
+                exit = true;
+            }
             writeln!(stdin, "{line}").unwrap();
             let mut buf = String::new();
             if f.read_line(&mut buf).is_err() {

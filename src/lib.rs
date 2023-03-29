@@ -100,11 +100,20 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
     let mut stack: Vec<Sha3_384> = Vec::new();
     stack.push(hasher.clone());
 
+    let mut exit = false;
+
     // The main loop.
     loop {
+        if exit {
+            break;
+        }
         let line = get_next_line_from_stdin();
         if line.is_empty() {
             break;
+        }
+
+        if line.eq("(exit)") {
+            exit = true;
         }
 
         // Skip SMT-LIB2 comments.
