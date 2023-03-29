@@ -6,10 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[example]]
-name = "yices"
+name = "cached-smt-solver"
 
 [dependencies]
 base64 = "0.21.0"
-nix = "0.26.2"
 rusqlite = { version = "0.28.0", features = ["bundled"] }
 sha3 = "0.10.6"
+signal-hook = "0.3.15"

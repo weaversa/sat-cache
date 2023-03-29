@@ -10,7 +10,8 @@ use base64::{engine::general_purpose, Engine as _};
 use rusqlite::Connection;
 use sha3::{Digest, Sha3_384};
 use std::io::{BufRead, Write};
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::mpsc::{Receiver, Sender, TryRecvError};
+use std::sync::{atomic::AtomicBool, atomic::Ordering, Arc};
 
 /// This function creates a connection to an `SQLite` database.
 ///
@@ -89,7 +90,11 @@ fn send_line_to_stdout(line: &str) {
 ///
 /// This function may panic if the request to the SMT solver has some
 /// issue such as more (pop) than (push) commands.
-pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<String>) {
+pub fn simple_smt_transaction(
+    should_terminate: &Arc<AtomicBool>,
+    to_app: &Sender<String>,
+    from_app: &Receiver<String>,
+) {
     // Connect to the database.
     let db = db_connect("satcache.db");
 
@@ -104,7 +109,7 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
 
     // The main loop.
     loop {
-        if exit {
+        if exit || should_terminate.load(Ordering::Relaxed) {
             break;
         }
         let line = get_next_line_from_stdin();
@@ -147,11 +152,22 @@ pub fn simple_smt_transaction(to_app: &Sender<String>, from_app: &Receiver<Strin
                 // Session is not cached.
                 // Pass the request along and cache the result.
                 to_app.send(line).unwrap();
-                // Read the response. Break the loop on error.
-                response = match from_app.recv() {
-                    Ok(r) => r,
-                    Err(_) => break,
-                };
+                // Read the response. Return on error.
+                loop {
+                    if should_terminate.load(Ordering::Relaxed) {
+                        return;
+                    }
+                    response = match from_app.try_recv() {
+                        Ok(r) => r,
+                        Err(TryRecvError::Empty) => {
+                            continue;
+                        }
+                        Err(TryRecvError::Disconnected) => {
+                            return;
+                        }
+                    };
+                    break;
+                }
                 // Cache session result.
                 insert_result(&db, &get_hash(&hasher), &response);
             }

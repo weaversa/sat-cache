@@ -20,22 +20,34 @@ This project uses a number of mechanisms for increasing its assurance.
 # Local Testing
 
 Presuming Yices is installed in `/usr/local/bin/yices`. Compile this
-project's examples:
+project's example:
 
 ```
 $ cargo build --examples
 ```
 
-Then add the new `yices` binary to your path:
+Then add the new `cached-smt-solver` binary to your path:
 
 ```
-$ export PATH="$(pwd)/target/debug/examples/yices:$PATH"
+$ export PATH="$(pwd)/target/debug/examples/cached-smt-solver:$PATH"
+```
+
+Next, create a shell script to act as `yices` --
+
+```yices
+SAT_CACHE_SOLVER=/usr/local/bin/yices cached-smt-solver $@
+```
+
+and add this shell script to your path, ahead of the real `yices`.
+
+```
+$ export PATH="<path to yices script>:$PATH"
 ```
 
 Next, the following commands may be run to test this project:
 
 ```
-$ time yices < examples/test.smt2 
+$ time yices --mode=push-pop --print-success < examples/test.smt2
 ok
 ok
 ok
@@ -65,7 +77,7 @@ sys     0m0.011s
 Notice the `(check)` line will take longer the first time it's run. Running this example a second time will provide results instantly:
 
 ```
-$ time yices < examples/test.smt2 
+$ time yices --mode=push-pop --print-success < examples/test.smt2
 ok
 ok
 ok
