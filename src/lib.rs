@@ -9,6 +9,7 @@ pub mod app;
 use base64::{engine::general_purpose, Engine as _};
 use rusqlite::Connection;
 use sha3::{Digest, Sha3_384};
+use std::env;
 use std::io::{BufRead, Write};
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::sync::{atomic::AtomicBool, atomic::Ordering, Arc};
@@ -97,8 +98,15 @@ pub fn simple_smt_transaction(
     should_terminate: &Arc<AtomicBool>,
     print_success: bool,
 ) {
+    // Get database location from the `SAT_CACHE_DATABASE` environment
+    // variable.
+    let db_location: String = match env::var("SAT_CACHE_DATABASE") {
+        Ok(v) => v,
+        Err(_) => "satcache.db".to_string(), // Default to `satcache.db`
+    };
+
     // Connect to the database.
-    let db = db_connect("satcache.db");
+    let db = db_connect(&db_location);
 
     // Create a SHA3-384 object.
     let mut hasher = Sha3_384::new();
