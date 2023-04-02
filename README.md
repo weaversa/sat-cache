@@ -36,7 +36,9 @@ Next, create a shell script to act as `yices` --
 
 ```yices
 #!/bin/sh
-SAT_CACHE_SOLVER=/usr/local/bin/yices cached-smt-solver $@
+export SAT_CACHE_PRINT_SUCCESS=""
+export SAT_CACHE_SOLVER=/usr/local/bin/yices
+cached-smt-solver $@
 ```
 
 and add this shell script to your path, ahead of the real `yices`.

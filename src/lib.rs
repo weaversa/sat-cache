@@ -12,6 +12,7 @@ use sha3::{Digest, Sha3_384};
 use std::io::{BufRead, Write};
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::sync::{atomic::AtomicBool, atomic::Ordering, Arc};
+use std::{thread, time};
 
 /// This function creates a connection to an `SQLite` database.
 ///
@@ -91,9 +92,10 @@ fn send_line_to_stdout(line: &str) {
 /// This function may panic if the request to the SMT solver has some
 /// issue such as more (pop) than (push) commands.
 pub fn simple_smt_transaction(
-    should_terminate: &Arc<AtomicBool>,
     to_app: &Sender<String>,
     from_app: &Receiver<String>,
+    should_terminate: &Arc<AtomicBool>,
+    print_success: bool,
 ) {
     // Connect to the database.
     let db = db_connect("satcache.db");
@@ -155,11 +157,14 @@ pub fn simple_smt_transaction(
                 // Read the response. Return on error.
                 loop {
                     if should_terminate.load(Ordering::Relaxed) {
+                        println!("signal received...");
                         return;
                     }
                     response = match from_app.try_recv() {
                         Ok(r) => r,
                         Err(TryRecvError::Empty) => {
+                            let ten_millis = time::Duration::from_millis(10);
+                            thread::sleep(ten_millis);
                             continue;
                         }
                         Err(TryRecvError::Disconnected) => {
@@ -178,10 +183,13 @@ pub fn simple_smt_transaction(
             // This kind of line will not be cached. Send it along to
             // the SMT solver.
             to_app.send(line).unwrap();
-            // Read the response. Break the loop on error.
-            let Ok(response) = from_app.recv() else { break };
-            // Send the response back to the calling application.
-            send_line_to_stdout(&response);
+
+            if print_success {
+                // Read the response. Break the loop on error.
+                let Ok(response) = from_app.recv() else { break };
+                // Send the response back to the calling application.
+                send_line_to_stdout(&response);
+            }
         }
     }
 }

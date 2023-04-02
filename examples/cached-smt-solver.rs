@@ -48,11 +48,12 @@ use std::sync::mpsc::channel;
 use std::sync::{atomic::AtomicBool, Arc};
 
 pub fn main() {
-    let env_name = "SAT_CACHE_SOLVER";
-    let solver = match env::var(env_name) {
+    let solver = match env::var("SAT_CACHE_SOLVER") {
         Ok(v) => v,
-        Err(e) => panic!("${env_name} is not set ({e})"),
+        Err(e) => panic!("SAT_CACHE_SOLVER is not set ({e})"),
     };
+
+    let print_success = env::var("SAT_CACHE_PRINT_SUCCESS").is_ok();
 
     // Ask signal_hook to set the term variable to true
     // when the program receives a kill signal.
@@ -67,12 +68,15 @@ pub fn main() {
     let (to_solver, solver_receiver) = channel();
     let args: Vec<String> = env::args().collect();
     let inputs: Vec<&str> = args.iter().map(AsRef::as_ref).collect();
-    let _process = satcache::app::start_process(
+    let mut process = satcache::app::start_process(
         &solver,
         inputs[1..].to_vec(),
         solver_sender,
         solver_receiver,
+        print_success,
     );
 
-    satcache::simple_smt_transaction(&should_terminate, &to_solver, &from_solver);
+    satcache::simple_smt_transaction(&to_solver, &from_solver, &should_terminate, print_success);
+
+    process.kill().unwrap();
 }
