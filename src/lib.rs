@@ -37,7 +37,8 @@ pub fn db_connect(db_file: &str) -> Connection {
 }
 
 /// This function inserts a `(hash, result)` into the `SQLite` database.
-fn insert_result(db: &Connection, hash: &str, result: &str) {
+fn insert_result(db_location: &str, hash: &str, result: &str) {
+    let db = db_connect(db_location);
     // Insert hash:result into the database.
     db.execute(
         "INSERT OR IGNORE INTO data (hash, result) VALUES (?1, ?2)",
@@ -48,7 +49,9 @@ fn insert_result(db: &Connection, hash: &str, result: &str) {
 
 /// This function queries the `SQLite` database for `result` at the
 /// given `hash`.
-pub fn get_result(db: &Connection, hash: &str) -> String {
+#[must_use]
+pub fn get_result(db_location: &str, hash: &str) -> String {
+    let db = db_connect(db_location);
     // Retrieve from the database, the result based on a given
     // hash. Returns the empty string if no such hash exists.
     match db.query_row("SELECT result FROM data where hash = ?1", [hash], |row| {
@@ -105,9 +108,6 @@ pub fn simple_smt_transaction(
         Err(_) => "satcache.db".to_string(), // Default to `satcache.db`
     };
 
-    // Connect to the database.
-    let db = db_connect(&db_location);
-
     // Create a SHA3-384 object.
     let mut hasher = Sha3_384::new();
 
@@ -157,7 +157,7 @@ pub fn simple_smt_transaction(
             || line.starts_with("(get-value ")
         {
             // Check to see if this session is cached.
-            let mut response = get_result(&db, &get_hash(&hasher));
+            let mut response = get_result(&db_location, &get_hash(&hasher));
             if response.is_empty() {
                 // Session is not cached.
                 // Pass the request along and cache the result.
@@ -182,7 +182,7 @@ pub fn simple_smt_transaction(
                     break;
                 }
                 // Cache session result.
-                insert_result(&db, &get_hash(&hasher), &response);
+                insert_result(&db_location, &get_hash(&hasher), &response);
             }
 
             // Send the response back to the calling application.
@@ -210,14 +210,14 @@ mod tests {
     fn it_works() {
         // create a SHA3-384 object
         let mut hasher = Sha3_384::new();
-        let db = db_connect("satcache.db");
+        let db_location = "satcache.db";
         hasher.update("hellofish");
-        insert_result(&db, &get_hash(&hasher), "file is sat");
-        let s = get_result(&db, &get_hash(&hasher));
+        insert_result(db_location, &get_hash(&hasher), "file is sat");
+        let s = get_result(db_location, &get_hash(&hasher));
         assert_eq!(s, "file is sat");
         hasher.reset();
         hasher.update("hellofish1");
-        let s2 = get_result(&db, &get_hash(&hasher));
+        let s2 = get_result(db_location, &get_hash(&hasher));
         assert!(s2.is_empty());
     }
 }
